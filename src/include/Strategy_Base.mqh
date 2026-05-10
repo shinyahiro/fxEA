@@ -107,7 +107,7 @@ string GetStrategyName(int strategyId)
       case STRATEGY_MA_CROSS:    return("MA Cross");
       case STRATEGY_BREAKOUT:    return("Breakout");
       case STRATEGY_RSI_MEAN:    return("RSI Mean Reversion");
-      case STRATEGY_ASIAN_BREAK: return("Asian Breakout");
+      case STRATEGY_ASIAN_BREAK: return("Previous Day Breakout");
       default: return("Unknown");
    }
 }

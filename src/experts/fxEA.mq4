@@ -16,7 +16,7 @@
 //|                                                                  |
 //+------------------------------------------------------------------+
 #property copyright "fxEA"
-#property version   "1.20"
+#property version   "1.30"
 #property strict
 
 //=== Include Modules ===
@@ -46,7 +46,7 @@ input double TPAtrMultiplier  = 3.0;   // TP Distance (ATR x)
 input int    AtrPeriod        = 14;    // ATR Period
 
 //=== Money Management ===
-input double RiskPercent      = 1.0;   // Risk Per Trade (%)
+input double RiskPercent      = 3.0;   // Risk Per Trade (%)
 input double MaxRiskPercent   = 2.0;   // Max Risk Warning (%)
 input int    HardSLBufferPips = 50;    // HardSL Buffer (pips)
 input int    SpreadBufferPips = 3;     // Spread Buffer (pips)
@@ -64,7 +64,7 @@ input double PartialCloseAtR   = 1.0;   // Partial Close Trigger (R)
 input bool   UseTrailing       = true;  // Use Trailing Stop
 input int    TrailingLookback  = 20;    // Trailing Lookback Bars
 input bool   UseTimeStop       = true;  // Use Time Stop
-input int    TimeStopHours     = 4;     // Time Stop (hours)
+input int    TimeStopHours     = 24;    // Time Stop (hours)
 
 //=== Filters ===
 input bool   UseTimeFilter    = true;   // Use Time Filter
@@ -302,7 +302,7 @@ string GetStatusDisplay()
 {
    string out = "";
    out += "========================================\n";
-   out += "  fxEA v1.20 - " + GetStrategyName(SelectedStrategy) + "\n";
+   out += "  fxEA v1.30 - " + GetStrategyName(SelectedStrategy) + "\n";
    out += "========================================\n\n";
 
    // Trading status
