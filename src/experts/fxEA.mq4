@@ -16,7 +16,7 @@
 //|                                                                  |
 //+------------------------------------------------------------------+
 #property copyright "fxEA"
-#property version   "1.30"
+#property version   "1.40"
 #property strict
 
 //=== Include Modules ===
@@ -67,7 +67,7 @@ input bool   UseTimeStop       = true;  // Use Time Stop
 input int    TimeStopHours     = 24;    // Time Stop (hours)
 
 //=== Filters ===
-input bool   UseTimeFilter    = true;   // Use Time Filter
+input bool   UseTimeFilter    = false;  // Use Time Filter
 input int    TradeStartHour   = 2;      // Trade Start Hour (Server)
 input int    TradeEndHour     = 18;     // Trade End Hour (Server)
 input bool   UseTrendFilter   = true;   // Use Trend Filter
@@ -302,7 +302,7 @@ string GetStatusDisplay()
 {
    string out = "";
    out += "========================================\n";
-   out += "  fxEA v1.30 - " + GetStrategyName(SelectedStrategy) + "\n";
+   out += "  fxEA v1.40 - " + GetStrategyName(SelectedStrategy) + "\n";
    out += "========================================\n\n";
 
    // Trading status
