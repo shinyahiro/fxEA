@@ -16,7 +16,7 @@
 //|                                                                  |
 //+------------------------------------------------------------------+
 #property copyright "fxEA"
-#property version   "1.00"
+#property version   "1.20"
 #property strict
 
 //=== Include Modules ===
@@ -26,13 +26,14 @@
 #include "../include/Strategy_Base.mqh"
 #include "../include/Strategy_MACross.mqh"
 #include "../include/Strategy_Breakout.mqh"
+#include "../include/Strategy_AsianBreak.mqh"
 
 //+------------------------------------------------------------------+
 //| Input Parameters                                                  |
 //+------------------------------------------------------------------+
 
 //=== Strategy Selection ===
-input int    SelectedStrategy = 2;   // Strategy (1=MA Cross, 2=Breakout)
+input int    SelectedStrategy = 4;   // Strategy (1=MA Cross, 2=Breakout, 4=Asian Break)
 
 //=== MA Cross Strategy Settings ===
 input int    FastMAPeriod     = 10;   // Fast MA Period
@@ -127,6 +128,9 @@ bool CheckStrategySignal(TradeSignal &signal)
 
       case STRATEGY_BREAKOUT:
          return Strategy_Breakout_CheckEntry(signal, g_config);
+
+      case STRATEGY_ASIAN_BREAK:
+         return Strategy_AsianBreak_CheckEntry(signal, g_config);
 
       default:
          return false;
@@ -277,7 +281,7 @@ void LoadExistingPositions()
             g_positions[idx].breakEvenMoved = false;
             g_positions[idx].partialClosed = false;
             g_positions[idx].state = STATE_ACTIVE_PRE_BE;
-            g_positions[idx].strategyId = STRATEGY_MA_CROSS;
+            g_positions[idx].strategyId = SelectedStrategy;
             g_positions[idx].entryReason = "Loaded";
 
             // Estimate initial risk
@@ -298,7 +302,7 @@ string GetStatusDisplay()
 {
    string out = "";
    out += "========================================\n";
-   out += "  fxEA v1.00 - " + GetStrategyName(SelectedStrategy) + "\n";
+   out += "  fxEA v1.20 - " + GetStrategyName(SelectedStrategy) + "\n";
    out += "========================================\n\n";
 
    // Trading status
@@ -316,6 +320,8 @@ string GetStatusDisplay()
       out += Strategy_MACross_GetStatus(g_config) + "\n\n";
    else if(SelectedStrategy == STRATEGY_BREAKOUT)
       out += Strategy_Breakout_GetStatus(g_config) + "\n\n";
+   else if(SelectedStrategy == STRATEGY_ASIAN_BREAK)
+      out += Strategy_AsianBreak_GetStatus(g_config) + "\n\n";
 
    // Position info
    if(ArraySize(g_positions) > 0)

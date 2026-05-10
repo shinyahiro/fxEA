@@ -7,10 +7,11 @@
 #property strict
 
 //=== Strategy IDs ===
-#define STRATEGY_NONE      0
-#define STRATEGY_MA_CROSS  1
-#define STRATEGY_BREAKOUT  2
-#define STRATEGY_RSI_MEAN  3
+#define STRATEGY_NONE        0
+#define STRATEGY_MA_CROSS    1
+#define STRATEGY_BREAKOUT    2
+#define STRATEGY_RSI_MEAN    3
+#define STRATEGY_ASIAN_BREAK 4
 
 //=== Trade Signal Structure ===
 // Output from strategy indicating an entry opportunity
@@ -103,9 +104,10 @@ string GetStrategyName(int strategyId)
 {
    switch(strategyId)
    {
-      case STRATEGY_MA_CROSS: return("MA Cross");
-      case STRATEGY_BREAKOUT: return("Breakout");
-      case STRATEGY_RSI_MEAN: return("RSI Mean Reversion");
+      case STRATEGY_MA_CROSS:    return("MA Cross");
+      case STRATEGY_BREAKOUT:    return("Breakout");
+      case STRATEGY_RSI_MEAN:    return("RSI Mean Reversion");
+      case STRATEGY_ASIAN_BREAK: return("Asian Breakout");
       default: return("Unknown");
    }
 }

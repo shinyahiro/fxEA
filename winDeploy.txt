@@ -12,6 +12,8 @@ C:\Users\SHIN\AppData\Roaming\MetaQuotes\Terminal\34B08C83A5AAE27A4079DE708E6051
 - PositionManager.mqh
 - Strategy_Base.mqh
 - Strategy_MACross.mqh
+- Strategy_Breakout.mqh
+- Strategy_AsianBreak.mqh
 
 ### Expert Advisor (MQL4/Experts/fxEA/)
 - fxEA.mq4
@@ -24,6 +26,8 @@ C:\Users\SHIN\AppData\Roaming\MetaQuotes\Terminal\34B08C83A5AAE27A4079DE708E6051
 C:\Users\SHIN\AppData\Roaming\MetaQuotes\Terminal\34B08C83A5AAE27A4079DE708E60511E\MQL4\Include\fxEA\PositionManager.mqh
 C:\Users\SHIN\AppData\Roaming\MetaQuotes\Terminal\34B08C83A5AAE27A4079DE708E60511E\MQL4\Include\fxEA\Strategy_Base.mqh
 C:\Users\SHIN\AppData\Roaming\MetaQuotes\Terminal\34B08C83A5AAE27A4079DE708E60511E\MQL4\Include\fxEA\Strategy_MACross.mqh
+C:\Users\SHIN\AppData\Roaming\MetaQuotes\Terminal\34B08C83A5AAE27A4079DE708E60511E\MQL4\Include\fxEA\Strategy_Breakout.mqh
+C:\Users\SHIN\AppData\Roaming\MetaQuotes\Terminal\34B08C83A5AAE27A4079DE708E60511E\MQL4\Include\fxEA\Strategy_AsianBreak.mqh
 
 ### Expert
 C:\Users\SHIN\AppData\Roaming\MetaQuotes\Terminal\34B08C83A5AAE27A4079DE708E60511E\MQL4\Experts\fxEA\fxEA.mq4
