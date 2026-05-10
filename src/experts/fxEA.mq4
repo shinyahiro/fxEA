@@ -25,13 +25,14 @@
 #include "../include/PositionManager.mqh"
 #include "../include/Strategy_Base.mqh"
 #include "../include/Strategy_MACross.mqh"
+#include "../include/Strategy_Breakout.mqh"
 
 //+------------------------------------------------------------------+
 //| Input Parameters                                                  |
 //+------------------------------------------------------------------+
 
 //=== Strategy Selection ===
-input int    SelectedStrategy = 1;   // Strategy (1=MA Cross)
+input int    SelectedStrategy = 2;   // Strategy (1=MA Cross, 2=Breakout)
 
 //=== MA Cross Strategy Settings ===
 input int    FastMAPeriod     = 10;   // Fast MA Period
@@ -123,6 +124,9 @@ bool CheckStrategySignal(TradeSignal &signal)
    {
       case STRATEGY_MA_CROSS:
          return Strategy_MACross_CheckEntry(signal, g_config);
+
+      case STRATEGY_BREAKOUT:
+         return Strategy_Breakout_CheckEntry(signal, g_config);
 
       default:
          return false;
@@ -308,7 +312,10 @@ string GetStatusDisplay()
       out += "  STATUS: WAITING FOR SIGNAL\n\n";
 
    // Strategy info
-   out += Strategy_MACross_GetStatus(g_config) + "\n\n";
+   if(SelectedStrategy == STRATEGY_MA_CROSS)
+      out += Strategy_MACross_GetStatus(g_config) + "\n\n";
+   else if(SelectedStrategy == STRATEGY_BREAKOUT)
+      out += Strategy_Breakout_GetStatus(g_config) + "\n\n";
 
    // Position info
    if(ArraySize(g_positions) > 0)

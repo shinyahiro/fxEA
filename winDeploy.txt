@@ -1,0 +1,37 @@
+# fxEA Deployment Information
+# Gaitame Finest MetaTrader4
+
+## MT4 Data Folder
+C:\Users\SHIN\AppData\Roaming\MetaQuotes\Terminal\34B08C83A5AAE27A4079DE708E60511E\
+
+## Deployed Files
+
+### Include Files (MQL4/Include/fxEA/)
+- Utils.mqh
+- RiskManager.mqh
+- PositionManager.mqh
+- Strategy_Base.mqh
+- Strategy_MACross.mqh
+
+### Expert Advisor (MQL4/Experts/fxEA/)
+- fxEA.mq4
+
+## Full Paths
+
+### Include
+C:\Users\SHIN\AppData\Roaming\MetaQuotes\Terminal\34B08C83A5AAE27A4079DE708E60511E\MQL4\Include\fxEA\Utils.mqh
+C:\Users\SHIN\AppData\Roaming\MetaQuotes\Terminal\34B08C83A5AAE27A4079DE708E60511E\MQL4\Include\fxEA\RiskManager.mqh
+C:\Users\SHIN\AppData\Roaming\MetaQuotes\Terminal\34B08C83A5AAE27A4079DE708E60511E\MQL4\Include\fxEA\PositionManager.mqh
+C:\Users\SHIN\AppData\Roaming\MetaQuotes\Terminal\34B08C83A5AAE27A4079DE708E60511E\MQL4\Include\fxEA\Strategy_Base.mqh
+C:\Users\SHIN\AppData\Roaming\MetaQuotes\Terminal\34B08C83A5AAE27A4079DE708E60511E\MQL4\Include\fxEA\Strategy_MACross.mqh
+
+### Expert
+C:\Users\SHIN\AppData\Roaming\MetaQuotes\Terminal\34B08C83A5AAE27A4079DE708E60511E\MQL4\Experts\fxEA\fxEA.mq4
+
+## Deployment Date
+2026-05-10
+
+## Notes
+- Include path in EA: #include <fxEA/xxx.mqh>
+- Compile with MetaEditor (F7)
+- Attach to USDJPY H1 chart
