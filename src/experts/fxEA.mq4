@@ -16,7 +16,7 @@
 //|                                                                  |
 //+------------------------------------------------------------------+
 #property copyright "fxEA"
-#property version   "1.40"
+#property version   "1.50"
 #property strict
 
 //=== Include Modules ===
@@ -27,13 +27,14 @@
 #include "../include/Strategy_MACross.mqh"
 #include "../include/Strategy_Breakout.mqh"
 #include "../include/Strategy_AsianBreak.mqh"
+#include "../include/Strategy_Grid.mqh"
 
 //+------------------------------------------------------------------+
 //| Input Parameters                                                  |
 //+------------------------------------------------------------------+
 
 //=== Strategy Selection ===
-input int    SelectedStrategy = 4;   // Strategy (1=MA Cross, 2=Breakout, 4=Asian Break)
+input int    SelectedStrategy = 5;   // Strategy (1=MA, 2=Breakout, 4=Range, 5=Grid)
 
 //=== MA Cross Strategy Settings ===
 input int    FastMAPeriod     = 10;   // Fast MA Period
@@ -75,7 +76,7 @@ input int    TrendMAPeriod    = 100;    // Trend MA Period
 input double MaxSpreadPips    = 5.0;    // Max Spread (pips)
 
 //=== Position Limits ===
-input int    MaxPositions     = 1;      // Max Positions
+input int    MaxPositions     = 7;      // Max Positions
 
 //=== Safety ===
 input int    MagicNumber      = 20260510; // Magic Number
@@ -132,6 +133,9 @@ bool CheckStrategySignal(TradeSignal &signal)
       case STRATEGY_ASIAN_BREAK:
          return Strategy_AsianBreak_CheckEntry(signal, g_config);
 
+      case STRATEGY_GRID:
+         return Strategy_Grid_CheckEntry(signal, g_config);
+
       default:
          return false;
    }
@@ -165,22 +169,34 @@ bool ExecuteEntry(TradeSignal &signal)
 {
    if(!signal.valid) return false;
 
-   // Calculate lots
-   double softSLPips = PriceToPips(MathAbs(signal.softSLPrice -
-      (signal.direction == OP_BUY ? Bid : Ask)));
-   double lots = CalculateLots(softSLPips, HardSLBufferPips, SpreadBufferPips, RiskPercent);
-
-   if(lots <= 0)
-   {
-      WriteLog("ERROR", "Lot calculation failed");
-      return false;
-   }
-
-   // Calculate HardSL
+   double lots = 0;
+   double hardSLPrice = 0;
    double entryPrice = (signal.direction == OP_BUY) ? Ask : Bid;
-   double hardSLPrice = CalculateHardSLPrice(entryPrice, signal.softSLPrice,
-                                              HardSLBufferPips, SpreadBufferPips,
-                                              signal.direction);
+
+   // Grid strategy: fixed lot, no individual SL/TP
+   if(signal.strategyId == STRATEGY_GRID)
+   {
+      lots = 0.01;  // Fixed lot size for grid
+      hardSLPrice = 0;  // No individual SL
+   }
+   else
+   {
+      // Normal strategies: calculate lots based on SL
+      double softSLPips = PriceToPips(MathAbs(signal.softSLPrice -
+         (signal.direction == OP_BUY ? Bid : Ask)));
+      lots = CalculateLots(softSLPips, HardSLBufferPips, SpreadBufferPips, RiskPercent);
+
+      if(lots <= 0)
+      {
+         WriteLog("ERROR", "Lot calculation failed");
+         return false;
+      }
+
+      // Calculate HardSL
+      hardSLPrice = CalculateHardSLPrice(entryPrice, signal.softSLPrice,
+                                                  HardSLBufferPips, SpreadBufferPips,
+                                                  signal.direction);
+   }
 
    // Send order
    int ticket = OrderSend(
@@ -231,6 +247,12 @@ bool ExecuteEntry(TradeSignal &signal)
             " " + (signal.direction == OP_BUY ? "BUY" : "SELL") +
             " Lots=" + DoubleToString(lots, 2) +
             " " + signal.reason);
+
+   // Update grid position count if grid strategy
+   if(signal.strategyId == STRATEGY_GRID)
+   {
+      UpdateGridPositionCount(ArraySize(g_positions));
+   }
 
    return true;
 }
@@ -302,7 +324,7 @@ string GetStatusDisplay()
 {
    string out = "";
    out += "========================================\n";
-   out += "  fxEA v1.40 - " + GetStrategyName(SelectedStrategy) + "\n";
+   out += "  fxEA v1.50 - " + GetStrategyName(SelectedStrategy) + "\n";
    out += "========================================\n\n";
 
    // Trading status
@@ -322,6 +344,8 @@ string GetStatusDisplay()
       out += Strategy_Breakout_GetStatus(g_config) + "\n\n";
    else if(SelectedStrategy == STRATEGY_ASIAN_BREAK)
       out += Strategy_AsianBreak_GetStatus(g_config) + "\n\n";
+   else if(SelectedStrategy == STRATEGY_GRID)
+      out += Strategy_Grid_GetStatus(g_config) + "\n\n";
 
    // Position info
    if(ArraySize(g_positions) > 0)
@@ -380,7 +404,93 @@ void OnTick()
    bool isNewBar = (Time[0] != g_lastBarTime);
    if(isNewBar) g_lastBarTime = Time[0];
 
-   //=== 2. Position Management (every tick) ===
+   //=== 2. Grid Management (Grid strategy only) ===
+   if(SelectedStrategy == STRATEGY_GRID && ArraySize(g_positions) > 0)
+   {
+      // Check if all positions are grid positions
+      bool allGrid = true;
+      for(int i = 0; i < ArraySize(g_positions); i++)
+      {
+         if(g_positions[i].strategyId != STRATEGY_GRID)
+         {
+            allGrid = false;
+            break;
+         }
+      }
+
+      if(allGrid && ArraySize(g_positions) > 0)
+      {
+         // Calculate average entry price and total lots
+         double totalLots = 0;
+         double weightedPrice = 0;
+         int gridDirection = g_positions[0].direction;
+         datetime firstEntryTime = g_positions[0].entryTime;
+
+         for(int i = 0; i < ArraySize(g_positions); i++)
+         {
+            totalLots += g_positions[i].currentLots;
+            weightedPrice += g_positions[i].entryPrice * g_positions[i].currentLots;
+            if(g_positions[i].entryTime < firstEntryTime)
+               firstEntryTime = g_positions[i].entryTime;
+         }
+
+         double avgPrice = weightedPrice / totalLots;
+         double currentPrice = (gridDirection == OP_BUY) ? Bid : Ask;
+         double profitPips = 0;
+
+         if(gridDirection == OP_BUY)
+            profitPips = PriceToPips(currentPrice - avgPrice);
+         else
+            profitPips = PriceToPips(avgPrice - currentPrice);
+
+         // Check Time Stop (48 hours)
+         int elapsedHours = (int)((TimeCurrent() - firstEntryTime) / 3600);
+         bool timeStopHit = (elapsedHours >= 48);
+
+         // Check profit target (+30 pips)
+         bool profitTargetHit = (profitPips >= 30);
+
+         // Check max positions and further adverse move
+         bool emergencyExit = false;
+         if(ArraySize(g_positions) >= 7)
+         {
+            // If at max positions and price moved further against us by 25 pips
+            double lastEntryPrice = g_positions[ArraySize(g_positions) - 1].entryPrice;
+            double adversePips = 0;
+
+            if(gridDirection == OP_BUY)
+               adversePips = PriceToPips(lastEntryPrice - currentPrice);
+            else
+               adversePips = PriceToPips(currentPrice - lastEntryPrice);
+
+            if(adversePips >= 25)
+               emergencyExit = true;
+         }
+
+         // Close all grid positions if condition met
+         if(profitTargetHit || timeStopHit || emergencyExit)
+         {
+            string reason = "";
+            if(profitTargetHit) reason = "GridTarget(+" + DoubleToString(profitPips, 1) + "pips)";
+            else if(timeStopHit) reason = "GridTimeStop(" + IntegerToString(elapsedHours) + "h)";
+            else if(emergencyExit) reason = "GridEmergency(MaxPos)";
+
+            WriteLog("GRID_EXIT", reason + " - Closing " + IntegerToString(ArraySize(g_positions)) + " positions");
+
+            // Close all positions
+            for(int i = ArraySize(g_positions) - 1; i >= 0; i--)
+            {
+               ClosePosition(g_positions[i], reason, MaxSlippage);
+               RemovePosition(i);
+            }
+
+            // Reset grid state
+            ResetGridState();
+         }
+      }
+   }
+
+   //=== 3. Position Management (every tick) ===
    for(int i = ArraySize(g_positions) - 1; i >= 0; i--)
    {
       // Check if position still exists
@@ -420,7 +530,7 @@ void OnTick()
       }
    }
 
-   //=== 3. New Entry Check (new bar only) ===
+   //=== 4. New Entry Check (new bar only) ===
    if(isNewBar && CanOpenNewPosition())
    {
       TradeSignal signal;
@@ -433,7 +543,7 @@ void OnTick()
       }
    }
 
-   //=== 4. Display Update ===
+   //=== 5. Display Update ===
    Comment(GetStatusDisplay());
 }
 //+------------------------------------------------------------------+
