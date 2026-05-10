@@ -42,7 +42,7 @@ input int    MAMethod         = 1;    // MA Type (0=SMA, 1=EMA)
 
 //=== SL/TP Settings (ATR multiplier) ===
 input double SLAtrMultiplier  = 2.0;   // SL Distance (ATR x)
-input double TPAtrMultiplier  = 3.0;   // TP Distance (ATR x)
+input double TPAtrMultiplier  = 1.5;   // TP Distance (ATR x)
 input int    AtrPeriod        = 14;    // ATR Period
 
 //=== Money Management ===
